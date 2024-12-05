@@ -45,7 +45,8 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
 
-  deploy:
+     
+deploy:
   runs-on: ubuntu-latest
   needs: build
   
@@ -74,4 +75,3 @@ jobs:
       run: |
         kubectl set image deployment/my-python-app my-python-app=${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
         kubectl rollout status deployment/my-python-app
-
