@@ -46,25 +46,32 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
 
   deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        
-      # Set up kubectl to interact with Kubernetes
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          kubectl-version: 'latest'
-          
-      - name: Configure Kubernetes credentials
-        run: |
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+  runs-on: ubuntu-latest
+  needs: build
+  
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      # Deploy to Kubernetes
-      - name: Deploy Docker container to Kubernetes
-        run: |
-          kubectl set image deployment/my-python-app my-python-app=${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
-          kubectl rollout status deployment/my-python-app
+    # Create kubeconfig directory and set config
+    - name: Create kubeconfig directory and set config
+      run: |
+        mkdir -p ~/.kube
+        echo "***" > ~/.kube/config
+
+    # Set up kubectl to interact with Kubernetes
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v1
+      with:
+        kubectl-version: 'latest'
+        
+    - name: Configure Kubernetes credentials
+      run: |
+        echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+        
+    # Deploy to Kubernetes
+    - name: Deploy Docker container to Kubernetes
+      run: |
+        kubectl set image deployment/my-python-app my-python-app=${{ secrets.DOCKER_USERNAME }}/my-python-app:latest
+        kubectl rollout status deployment/my-python-app
+
